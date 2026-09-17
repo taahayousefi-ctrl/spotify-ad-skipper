@@ -34,6 +34,14 @@ android {
         buildConfig = true
     }
 
+    packaging {
+        resources {
+            excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/NOTICE.md"
+            excludes += "/META-INF/DEPENDENCIES"
+        }
+    }
+
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("keystore/${keystoreProperties.getProperty("storeFile")}")
