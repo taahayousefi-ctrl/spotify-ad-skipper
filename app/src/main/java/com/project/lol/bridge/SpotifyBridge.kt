@@ -318,11 +318,12 @@ class SpotifyBridge(activityRef: WeakReference<Activity>) {
                         responseHeaders.put(key, values.first())
                     }
                 }
-            JSONObject().apply {
+                return JSONObject().apply {
                 put("status", code)
                 put("body", responseBody)
                 put("headers", responseHeaders)
-            }.toString()
+                }.toString()
+            }
         } catch (e: Exception) {
             errorResult(e)
         } finally {
