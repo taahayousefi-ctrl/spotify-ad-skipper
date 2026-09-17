@@ -324,6 +324,7 @@ class SpotifyBridge(activityRef: WeakReference<Activity>) {
                 put("headers", responseHeaders)
                 }.toString()
             }
+            ""
         } catch (e: Exception) {
             errorResult(e)
         } finally {
