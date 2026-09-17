@@ -107,7 +107,6 @@ import androidx.webkit.ProxyController
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import androidx.webkit.WebSettingsCompat
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.project.lol.R
 import com.project.lol.bridge.SpotifyBridge
 import com.project.lol.offline.DownloadManager
@@ -183,18 +182,10 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var prefs: SharedPreferences
 
-    private val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this) }
-
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-        // Track screen view
-        analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, Bundle().apply {
-            putString(FirebaseAnalytics.Param.SCREEN_NAME, "MainActivity")
-            putString(FirebaseAnalytics.Param.SCREEN_CLASS, "MainActivity")
-        })
 
         prefs = getSharedPreferences("spotilol_prefs", MODE_PRIVATE)
         val useProxy = prefs.getString("ConnectionMode", "normal") == "proxy"
@@ -348,12 +339,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 navigationIcon = {
-                                    IconButton(onClick = {
-                                        analytics.logEvent("open_settings", Bundle().apply {
-                                            putString(FirebaseAnalytics.Param.SCREEN_NAME, "SettingsDrawer")
-                                        })
-                                        settingsDrawerOpen = true
-                                    }) {
+                                    IconButton(onClick = { settingsDrawerOpen = true }) {
                                         Icon(
                                             imageVector = Icons.Default.Menu,
                                             contentDescription = "Settings",
@@ -623,16 +609,9 @@ class MainActivity : ComponentActivity() {
         serviceEnabledState.value = newValue
         prefs.edit().putBoolean("ServiceOn", newValue).apply()
         if (!newValue) {
-            analytics.logEvent("service_toggle", Bundle().apply {
-                putString("enabled", "off")
-            })
             stopService(Intent(this, MediaNotificationService::class.java))
             serviceStarted = false
             destroyWebView()
-        } else {
-            analytics.logEvent("service_toggle", Bundle().apply {
-                putString("enabled", "on")
-            })
         }
     }
 
@@ -712,10 +691,6 @@ class MainActivity : ComponentActivity() {
         val totalMs = minutes * 60 * 1000L
         sleepTimerActive.value = true
         sleepTimerRemainingMs.longValue = totalMs
-
-        analytics.logEvent("sleep_timer_start", Bundle().apply {
-            putString("minutes", minutes.toString())
-        })
 
         webView?.evaluateJavascript("""
             if(window.timerBtn) timerBtn.style.color='var(--spl-accent,#2d6)';
@@ -1335,11 +1310,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-
-        analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, Bundle().apply {
-            putString(FirebaseAnalytics.Param.SCREEN_NAME, "MainActivity")
-            putString(FirebaseAnalytics.Param.SCREEN_CLASS, "MainActivity")
-        })
 
         prefs = getSharedPreferences("spotilol_prefs", MODE_PRIVATE)
         serviceEnabledState.value = prefs.getBoolean("ServiceOn", true)
