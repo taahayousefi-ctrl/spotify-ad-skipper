@@ -249,35 +249,32 @@ class SpotifyBridge(activityRef: WeakReference<Activity>) {
                 if (!SecurityPolicy.isAllowedNativeFetchUrl(currentUrl)) {
                     throw SecurityException("blocked redirect")
                 }
-                conn = URL(currentUrl).openConnection() as HttpURLConnection
-                conn.apply {
+                conn = (URL(currentUrl).openConnection() as HttpURLConnection).apply {
                     instanceFollowRedirects = false
                     requestMethod = method
                     connectTimeout = 10000
                     readTimeout = 10000
-                val keys = headersJson.keys()
-                while (keys.hasNext()) {
-                    val key = keys.next()
-                    if (!FILTERED_HEADERS.contains(key.lowercase(Locale.ROOT))) {
-                        setRequestProperty(key, headersJson.getString(key))
+                    val keys = headersJson.keys()
+                    while (keys.hasNext()) {
+                        val key = keys.next()
+                        if (!FILTERED_HEADERS.contains(key.lowercase(Locale.ROOT))) {
+                            setRequestProperty(key, headersJson.getString(key))
+                        }
                     }
-                }
-                setRequestProperty("User-Agent", DESKTOP_UA)
-                setRequestProperty("sec-ch-ua-platform", "\"Windows\"")
-                setRequestProperty("sec-ch-ua-mobile", "?0")
-                setRequestProperty("sec-ch-ua", "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\", \"Google Chrome\";v=\"150\"")
-                if (url.contains("spclient.spotify.com") || url.contains("scdn.co") || url.contains("spotify.com")) {
-                    setRequestProperty("Origin", "https://open.spotify.com")
-                    setRequestProperty("Referer", "https://open.spotify.com/")
-                }
-                val cookie = CookieManager.getInstance().getCookie(currentUrl)
-                if (!cookie.isNullOrEmpty()) setRequestProperty("Cookie", cookie)
-                if (!body.isNullOrEmpty()) {
-                    doOutput = true
-                    outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-                }
-            }
-
+                    setRequestProperty("User-Agent", DESKTOP_UA)
+                    setRequestProperty("sec-ch-ua-platform", "\"Windows\"")
+                    setRequestProperty("sec-ch-ua-mobile", "?0")
+                    setRequestProperty("sec-ch-ua", "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\", \"Google Chrome\";v=\"150\"")
+                    if (currentUrl.contains("spclient.spotify.com") || currentUrl.contains("scdn.co") || currentUrl.contains("spotify.com")) {
+                        setRequestProperty("Origin", "https://open.spotify.com")
+                        setRequestProperty("Referer", "https://open.spotify.com/")
+                    }
+                    val cookie = CookieManager.getInstance().getCookie(currentUrl)
+                    if (!cookie.isNullOrEmpty()) setRequestProperty("Cookie", cookie)
+                    if (!body.isNullOrEmpty()) {
+                        doOutput = true
+                        outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                    }
                 }
 
                 val activeConn = conn ?: throw IllegalStateException("connection unavailable")
